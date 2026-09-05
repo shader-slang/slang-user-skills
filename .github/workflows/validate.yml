@@ -1,0 +1,48 @@
+name: Validate skills
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      slang_archive_url:
+        description: URL of a Slang Linux x86_64 tar.gz package
+        required: true
+        type: string
+      slang_archive_sha256:
+        description: Expected SHA-256 of the Slang package
+        required: true
+        type: string
+
+jobs:
+  skill-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate skills
+        run: python scripts/validate-skills.py
+
+  compiler-examples:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download selected Slang package
+        env:
+          SLANG_ARCHIVE_URL: ${{ inputs.slang_archive_url }}
+          SLANG_ARCHIVE_SHA256: ${{ inputs.slang_archive_sha256 }}
+        run: |
+          curl --fail --location "$SLANG_ARCHIVE_URL" --output slang.tar.gz
+          echo "$SLANG_ARCHIVE_SHA256  slang.tar.gz" | sha256sum --check --strict
+          mkdir slang
+          tar -xzf slang.tar.gz -C slang
+      - name: Validate examples
+        run: python scripts/validate-examples.py --slangc "$GITHUB_WORKSPACE/slang/bin/slangc"
