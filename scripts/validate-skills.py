@@ -46,12 +46,18 @@ def validate_skill(skill: Path) -> list[str]:
     errors.extend(f"{entrypoint}: {error}" for error in frontmatter_errors)
     name = frontmatter.get("name", "")
     description = frontmatter.get("description", "")
+    license_name = frontmatter.get("license", "")
+    compatibility = frontmatter.get("compatibility", "")
     if name != skill.name:
         errors.append(f"{entrypoint}: name {name!r} does not match directory {skill.name!r}")
     if not NAME_PATTERN.fullmatch(name) or len(name) > 64:
         errors.append(f"{entrypoint}: invalid Agent Skills name {name!r}")
     if not description or len(description) > 1024:
         errors.append(f"{entrypoint}: description must contain 1 through 1024 characters")
+    if not license_name:
+        errors.append(f"{entrypoint}: license is required by repository policy")
+    if compatibility and len(compatibility) > 500:
+        errors.append(f"{entrypoint}: compatibility must not exceed 500 characters")
 
     for markdown in skill.rglob("*.md"):
         text = markdown.read_text(encoding="utf-8")

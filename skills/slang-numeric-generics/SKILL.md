@@ -2,6 +2,7 @@
 name: slang-numeric-generics
 description: Select and use Slang's capability-oriented numeric interfaces when writing or porting generic numeric code. Use for scalar-versus-shaped constraints, component masks, scalar splats, builtin conversion, wrapper or custom-number conformances, compound arithmetic, elementary functions, or avoiding sealed builtin-only constraints.
 license: Apache-2.0 WITH LLVM-exception
+compatibility: Requires a Slang build that provides the experimental slang.numerics module; compile with -experimental-feature.
 ---
 
 # Use Slang Numeric Generics
