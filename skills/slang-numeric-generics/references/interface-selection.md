@@ -9,6 +9,7 @@ The scalar-or-shaped column accepts component-wise vector and matrix behavior wh
 | Addition, subtraction, zero, and compound assignment | `IAdditive` | `IScalarAdditive` |
 | Same-type multiplication, one, and construction from builtin integers | `INumeric` | `IScalarNumeric` |
 | Negation and absolute value | `ISignedNumeric` | `IScalarSignedNumeric` |
+| Same-shape dot product returning the logical scalar | `IDotProduct` for scalars and ordinary vectors | `IDotProduct & IScalarShapedType` when scalar-only must be explicit |
 | Division, reciprocal, and construction from builtin floating-point values | `IFractional` | `IScalarFractional` |
 | Floating-point representation, rounding, and classification | `IFloatingPoint` | `IScalarFloatingPoint` |
 | Integer division, remainder, bitwise operations, and shifts | `IIntegerType` | `IScalarIntegerType` |
@@ -21,14 +22,21 @@ The scalar-or-shaped column accepts component-wise vector and matrix behavior wh
 
 Use capability conjunctions when appropriate.
 For example, `IFractional & IRootFunctions` is preferable to `IReal` when the body needs arithmetic and square roots but no ordering or other elementary functions.
+Because `IDotProduct` is independent of the arithmetic hierarchy, a body that also uses real arithmetic should state `IReal & IDotProduct`.
 
 `IFloatingPoint` is not a synonym for real-number operations, and `IReal` does not require an IEEE floating-point representation.
 Use `IPartiallyOrdered` for IEEE-style scalar comparisons and `ITotallyOrdered` only when the type guarantees a total order.
 
 When a type parameter is used as the element of an explicitly constructed builtin vector or matrix, select the scalar-only refinement from the table.
-The builtin shape can additionally require a sealed builtin-element constraint.
-For a real-valued vector element, this can take the form `T : __BuiltinFloatingPointType & IScalarReal`.
-Retain the public part so the numeric capability remains visible.
+The builtin shape can additionally require a builtin-representation constraint.
+For a real-valued vector element, use `T : IBuiltinScalarReal`.
+The `IBuiltinScalar...` aliases are public conjunctions that preserve the readable scalar capability while imposing the compiler-supported representation domain.
+For a built-in floating-point element plus one independent operation family, use a conjunction such as `IBuiltinScalarFloatingPointType & ITrigonometricFunctions`.
+
+`IDotProduct` applies when the constrained type itself is the scalar or vector passed to `dot`.
+Do not replace it with a scalar element constraint unless the generic signature explicitly constructs `vector<T, N>` and therefore operates on the element parameter separately.
+Matrices and cooperative vectors do not currently conform to `IDotProduct`.
+See the compiler-checked [builtin-vector example](examples/builtin-vector-element.slang) and [custom dot-product example](examples/dot-product.slang).
 
 Cooperative-vector conformances and other shaped-type support can differ from ordinary vectors and matrices.
 Probe the exact shaped type and express only the independent capabilities needed by the algorithm.

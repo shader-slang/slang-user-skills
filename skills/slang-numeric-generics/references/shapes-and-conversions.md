@@ -39,7 +39,7 @@ T weightedSum<T : IFractional>(T left, T right, T.Scalar weight)
 Use ordinary construction syntax in generic code:
 
 ```slang
-T addBuiltinFloat<T : IFractional, S : __BuiltinFloatingPointType>(T left, S right)
+T addBuiltinFloat<T : IFractional, S : IBuiltinScalarFloatingPointType>(T left, S right)
 {
     return left + T(right);
 }

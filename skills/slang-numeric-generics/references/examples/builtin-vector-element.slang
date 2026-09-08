@@ -2,16 +2,14 @@
 
 import slang.numerics;
 
-vector<T, N> combineVector<T : __BuiltinFloatingPointType & IScalarReal, int N>(
+vector<T, N> combineVector<T : IBuiltinScalarReal, int N>(
     vector<T, N> left,
     vector<T, N> right)
 {
     return min(left + right, right);
 }
 
-T innerProduct<T : __BuiltinFloatingPointType & IScalarReal, int N>(
-    vector<T, N> left,
-    vector<T, N> right)
+T.Scalar innerProduct<T : IDotProduct>(T left, T right)
 {
     return dot(left, right);
 }

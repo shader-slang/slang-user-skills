@@ -15,12 +15,12 @@ struct Counter : IScalarAdditive
     This minus(This other) { return {value - other.value}; }
 }
 
-T twiceBuiltin<T : __BuiltinArithmeticType>(T value)
+T twiceBuiltin<T : IBuiltinScalarAdditive>(T value)
 {
     return value + value;
 }
 
-void demonstrateRejectedCall()
+void main()
 {
     Counter value = {7};
     Counter result = twiceBuiltin(value);

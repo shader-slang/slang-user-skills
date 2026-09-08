@@ -1,7 +1,7 @@
-# Public Numeric Contracts versus Sealed Builtin Constraints
+# Extensible Numeric Contracts versus Builtin Representation Constraints
 
 Public numeric interfaces describe capabilities that user-defined types can implement.
-Sealed `__Builtin*` interfaces describe compiler-recognized representations and intentionally cannot be implemented by user types.
+Public `IBuiltinScalar...` aliases combine those capabilities with compiler-recognized representation domains and intentionally cannot be satisfied by user types.
 
 Use a public contract when ordinary interface operations express the body:
 
@@ -19,7 +19,7 @@ This works for builtin additive values and for a user-defined type with a faithf
 This replacement is not equivalent:
 
 ```slang
-T twiceBuiltin<T : __BuiltinArithmeticType>(T value)
+T twiceBuiltin<T : IBuiltinScalarAdditive>(T value)
 {
     return value + value;
 }
@@ -27,7 +27,11 @@ T twiceBuiltin<T : __BuiltinArithmeticType>(T value)
 
 `twiceBuiltin` excludes every user-defined numeric type, even if it implements exactly the addition operation the body needs.
 
-Use a sealed builtin constraint when the implementation depends on a builtin-only intrinsic, representation, layout, or type constructor.
-For a generic builtin vector element, the sealed constraint can be conjoined with a public scalar capability so both requirements remain explicit.
+Use an `IBuiltinScalar...` constraint when the implementation depends on a builtin-only intrinsic, representation, layout, or type constructor.
+For a generic builtin vector element, select the alias matching the scalar capability the body needs, such as `IBuiltinScalarReal`.
+If the body also needs an independent operation family, conjoin that interface explicitly.
 
-The compiler-checked [negative example](examples/sealed-builtin-negative.slang) confirms that a user-defined additive type cannot satisfy the sealed interface.
+Do not use the implementation-level `__Builtin...` interfaces in user-facing code when a public alias covers the contract.
+For example, prefer `IBuiltinScalarFloatingPointType` over `__BuiltinFloatingPointType & IScalarFloatingPoint`.
+
+The compiler-checked [negative example](examples/sealed-builtin-negative.slang) confirms that a user-defined additive type cannot satisfy the builtin-representation constraint.

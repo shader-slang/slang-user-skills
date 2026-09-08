@@ -1,6 +1,6 @@
 ---
 name: slang-numeric-generics
-description: Select and use Slang's capability-oriented numeric interfaces when writing or porting generic numeric code. Use for scalar-versus-shaped constraints, component masks, scalar splats, builtin conversion, wrapper or custom-number conformances, compound arithmetic, elementary functions, or avoiding sealed builtin-only constraints.
+description: Select and use Slang's capability-oriented numeric interfaces when writing or porting generic numeric code. Use for scalar-versus-shaped constraints, dot products, component masks, scalar splats, builtin conversion, wrapper or custom-number conformances, compound arithmetic, elementary functions, or builtin-representation constraints.
 license: Apache-2.0 WITH LLVM-exception
 compatibility: Requires a Slang build that provides the experimental slang.numerics module; compile with -experimental-feature.
 ---
@@ -23,6 +23,10 @@ If the surrounding build system owns compiler options, add the source import and
 
 Import `slang.numerics.differentiable` instead when generic operations must participate in Slang automatic differentiation.
 That module re-exports the base numerics definitions.
+Use `IDifferentiableDotProduct` when a generic dot product must participate in automatic differentiation.
+
+If the import succeeds but documented interfaces are undefined, verify that the compiler executable and its standard-module artifacts come from the same compatible build.
+Do not replace the interfaces with legacy constraints merely to work around a stale or mismatched module installation.
 
 ## Classify the operated type
 
@@ -46,11 +50,15 @@ Escalate only when another operation requires it.
 When the operation inventory is broad or incomplete during a port, use `IScalarReal` as the readable scalar default or `IReal` as the scalar-or-shaped default.
 Narrow it once the contract is understood.
 
+`IDotProduct` is independent of `INumeric` and `IReal`.
+Conjoin it with the arithmetic capability when the same body uses both, for example `T : IReal & IDotProduct`.
+
 Important distinctions include:
 
 - `IAdditive` supplies addition, subtraction, and zero.
 - `INumeric` adds same-type multiplication, one, and construction from builtin integer types.
 - `ISignedNumeric` adds negation and absolute value.
+- `IDotProduct` independently supplies `dot(left, right)`, returning `T.Scalar`; built-in numeric scalars and ordinary vectors conform, but matrices and cooperative vectors currently do not.
 - `IFractional` adds division, reciprocal, and construction from builtin floating-point types without requiring an IEEE representation or elementary functions.
 - `IFloatingPoint` adds representation-specific rounding, remainder, splitting, sign-copying, and classification.
 - Elementary-function families are independent capabilities and can be joined with `&`.
@@ -76,27 +84,35 @@ T addToDouble<T : IFractional>(T left, double right)
 ```
 
 Prefer `T(value)` through `INumeric` or `IFractional` over calling an internal conversion primitive in user-facing generic code.
-When the source value has a generic builtin type, constrain that source with `__BuiltinIntegerType` or `__BuiltinFloatingPointType`; this sealed constraint describes the source representation, not the destination's mathematical contract.
+When the source value has a generic builtin type, constrain that source with `IBuiltinScalarIntegerType` or `IBuiltinScalarFloatingPointType`.
+These public aliases describe both the compiler-supported source representation and its scalar capability.
 
 Numeric conversion is not bit reinterpretation.
 Never substitute `bit_cast`, a same-type copy, a default value, or one-component splatting for component-wise value conversion.
 Read [references/shapes-and-conversions.md](references/shapes-and-conversions.md) for masks, splats, and conversions.
 
-## Keep public and sealed contracts distinct
+## Keep extensible and builtin-representation contracts distinct
 
-Do not use `__BuiltinArithmeticType`, `__BuiltinFloatingPointType`, or another sealed `__Builtin*` interface merely to silence an operator diagnostic.
-Those constraints intentionally exclude user-defined numeric types.
+The public `IBuiltinScalar...` aliases combine an extensible `IScalar...` capability with the compiler-supported builtin representation domain.
+They intentionally exclude user-defined numeric types, but unlike the implementation-level `__Builtin...` markers they are user-facing complete constraints.
 
-Use a sealed builtin constraint only when the implementation genuinely depends on a builtin representation, intrinsic, or shape constructor.
-For example, an explicit `vector<T, N>` can justify `T : __BuiltinFloatingPointType & IScalarReal`: the sealed interface admits the builtin vector representation, while the public interface communicates the numeric contract.
+Use an `IBuiltinScalar...` constraint only when the implementation genuinely depends on a builtin representation, intrinsic, or shape constructor.
+For example, an explicit real-valued `vector<T, N>` can justify `T : IBuiltinScalarReal`.
+If no convenience alias includes an independent operation family, conjoin it explicitly, as in `IBuiltinScalarFloatingPointType & ITrigonometricFunctions`.
+
+Do not spell implementation-level `__Builtin...` markers in user-facing code when a corresponding `IBuiltinScalar...` alias expresses the contract.
+Do not redundantly repeat the scalar capability already included in an `IBuiltinScalar...` alias.
 
 Do not fall back to legacy `IArithmetic`, `IFloat`, or `IComparable` when the capability-oriented interfaces express the contract.
-Read [references/public-versus-builtin.md](references/public-versus-builtin.md) when a sealed constraint appears tempting.
+Read [references/public-versus-builtin.md](references/public-versus-builtin.md) when a builtin-representation constraint appears necessary.
 
 ## Conform user-defined numeric types deliberately
 
 Make a custom type conform only when the type itself is passed to generic code requiring that capability.
 A dual number, complex number, interval, or similar mathematical scalar should normally start with a scalar refinement such as `IScalarAdditive`, `IScalarFractional`, or a conjunction of the exact capabilities it implements.
+
+Add `IDotProduct` only when the custom type itself has a clear same-shape inner-product operation needed by downstream generic code.
+Its requirement is `Scalar dotProductWith(This other)`; it is independent of ordinary multiplication and does not imply matrix semantics.
 
 Implement `Scalar == This`, `Mask == bool`, `fromScalar`, and every operation inherited by the chosen refinement.
 Construction requirements from builtin integer and floating-point types are part of `INumeric` and `IFractional` respectively.
@@ -114,7 +130,7 @@ Use this bounded repair order:
 1. Confirm that `slang.numerics` is imported and experimental features are enabled by the build.
 2. Confirm that the constraint applies to the type on which the operation is invoked.
 3. Select the minimum public capability for the operation.
-4. Add a sealed requirement only for an actual builtin representation or builtin-only intrinsic.
+4. Add an `IBuiltinScalar...` requirement only for an actual builtin representation or builtin-only intrinsic.
 5. If the source operation is provably component-wise and only a scalar overload exists, introduce one narrow same-shaped adapter that preserves the operation, shape, and element order.
 6. If faithful conversion, reduction, mask, or shape-rebinding semantics cannot be expressed, preserve the coherent port and report the minimized compiler or library gap.
 

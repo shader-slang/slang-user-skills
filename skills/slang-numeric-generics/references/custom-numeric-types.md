@@ -34,8 +34,13 @@ static This fromScalar(Scalar value)
 ```
 
 `INumeric` also requires construction from builtin integers, and `IFractional` requires construction from builtin floating-point values.
+Spell the generic constructor sources as `IBuiltinScalarIntegerType` and `IBuiltinScalarFloatingPointType`.
 Inside those constructor implementations, an internal builtin conversion can be appropriate because the custom representation is explicitly being built from compiler-recognized scalar types.
 User-facing generic algorithms should still call the public constructor as `T(value)`.
+
+`IDotProduct` is independent of the arithmetic hierarchy.
+Add it only when downstream code needs `dot` on the custom type and there is a clear operation returning the type's logical `Scalar`.
+It does not define matrix multiplication or give matrices a dot-product interpretation.
 
 The compiler-checked [dual-number example](examples/custom-dual-number.slang) implements `IScalarFractional` without pretending that the dual number itself has an IEEE floating-point representation.
 
