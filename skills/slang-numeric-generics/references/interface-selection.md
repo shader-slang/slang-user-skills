@@ -36,7 +36,9 @@ For a built-in floating-point element plus one independent operation family, use
 `IDotProduct` applies when the constrained type itself is the scalar or vector passed to `dot`.
 Do not replace it with a scalar element constraint unless the generic signature explicitly constructs `vector<T, N>` and therefore operates on the element parameter separately.
 Matrices and cooperative vectors do not currently conform to `IDotProduct`.
-See the compiler-checked [builtin-vector example](examples/builtin-vector-element.slang) and [custom dot-product example](examples/dot-product.slang).
+When `dot` must participate in automatic differentiation, import `slang.numerics.differentiable` and use `IDifferentiableDotProduct`.
+Built-in floating-point scalars and ordinary floating-point vectors already conform; a custom type must provide explicit forward- and reverse-mode derivative rules in addition to its base dot product.
+See the compiler-checked [builtin-vector example](examples/builtin-vector-element.slang), [custom dot-product example](examples/dot-product.slang), and [differentiable custom dot-product example](examples/differentiable-dot-product.slang).
 
 Cooperative-vector conformances and other shaped-type support can differ from ordinary vectors and matrices.
 Probe the exact shaped type and express only the independent capabilities needed by the algorithm.

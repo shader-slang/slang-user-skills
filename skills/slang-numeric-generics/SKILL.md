@@ -24,6 +24,8 @@ If the surrounding build system owns compiler options, add the source import and
 Import `slang.numerics.differentiable` instead when generic operations must participate in Slang automatic differentiation.
 That module re-exports the base numerics definitions.
 Use `IDifferentiableDotProduct` when a generic dot product must participate in automatic differentiation.
+Built-in floating-point scalars and ordinary floating-point vectors already provide that conformance.
+For a user-defined type, `IDifferentiableDotProduct` is not just a marker: it requires the type's usual `IDifferentiable` witnesses plus explicit forward- and reverse-mode derivative rules for `dot`.
 
 If the import succeeds but documented interfaces are undefined, verify that the compiler executable and its standard-module artifacts come from the same compatible build.
 Do not replace the interfaces with legacy constraints merely to work around a stale or mismatched module installation.
@@ -113,6 +115,9 @@ A dual number, complex number, interval, or similar mathematical scalar should n
 
 Add `IDotProduct` only when the custom type itself has a clear same-shape inner-product operation needed by downstream generic code.
 Its requirement is `Scalar dotProductWith(This other)`; it is independent of ordinary multiplication and does not imply matrix semantics.
+
+When generic automatic-differentiation code needs `dot` on the custom type, refine that conformance to `IDifferentiableDotProduct`.
+In addition to the base `dotProductWith` operation, implement `forwardDifferentiateDotProduct` and `backwardDifferentiateDotProduct`; Slang cannot currently infer or attach those derivative rules from the interface requirement alone.
 
 Implement `Scalar == This`, `Mask == bool`, `fromScalar`, and every operation inherited by the chosen refinement.
 Construction requirements from builtin integer and floating-point types are part of `INumeric` and `IFractional` respectively.
