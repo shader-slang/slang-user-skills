@@ -10,13 +10,13 @@ struct Dual : IScalarFractional
     typealias Scalar = Dual;
     typealias Mask = bool;
 
-    __init<TSource : __BuiltinIntegerType>(TSource value)
+    __init<TSource : IBuiltinScalarIntegerType>(TSource value)
     {
         primal = __realCast<float>(value);
         tangent = 0.0;
     }
 
-    __init<TSource : __BuiltinFloatingPointType>(TSource value)
+    __init<TSource : IBuiltinScalarFloatingPointType>(TSource value)
     {
         primal = __realCast<float>(value);
         tangent = 0.0;

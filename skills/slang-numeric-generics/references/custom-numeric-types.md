@@ -34,8 +34,31 @@ static This fromScalar(Scalar value)
 ```
 
 `INumeric` also requires construction from builtin integers, and `IFractional` requires construction from builtin floating-point values.
+Spell the generic constructor sources as `IBuiltinScalarIntegerType` and `IBuiltinScalarFloatingPointType`.
 Inside those constructor implementations, an internal builtin conversion can be appropriate because the custom representation is explicitly being built from compiler-recognized scalar types.
 User-facing generic algorithms should still call the public constructor as `T(value)`.
+
+`IDotProduct` is independent of the arithmetic hierarchy.
+Add it only when downstream code needs `dot` on the custom type and there is a clear operation returning the type's logical `Scalar`.
+It does not define matrix multiplication or give matrices a dot-product interpretation.
+
+For a differentiable custom dot product, import `slang.numerics.differentiable` and conform to `IDifferentiableDotProduct`.
+That refinement requires the ordinary `IDifferentiable` witnesses as well as both explicit derivative rules:
+
+```slang
+static DifferentialPair<Scalar> forwardDifferentiateDotProduct(
+    DifferentialPair<This> left,
+    DifferentialPair<This> right);
+
+static void backwardDifferentiateDotProduct(
+    inout DifferentialPair<This> left,
+    inout DifferentialPair<This> right,
+    Scalar.Differential outputDifferential);
+```
+
+Do not assume that marking `dotProductWith` as `[Differentiable]` satisfies this refinement.
+Slang cannot currently associate a custom derivative declaration with an interface requirement, so the landed interface exposes its forward- and reverse-mode rules directly.
+The compiler-checked [differentiable dot-product example](examples/differentiable-dot-product.slang) shows the complete conformance shape.
 
 The compiler-checked [dual-number example](examples/custom-dual-number.slang) implements `IScalarFractional` without pretending that the dual number itself has an IEEE floating-point representation.
 

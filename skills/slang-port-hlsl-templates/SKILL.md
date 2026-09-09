@@ -37,6 +37,11 @@ Otherwise express the body-derived contract:
    Constraining a wrapper's element does not automatically make the wrapper conform.
 5. Validate the proposed contract in a small probe before restructuring a large shader.
 
+When the generic explicitly constructs `vector<T, N>`, `matrix<T, R, C>`, or another builtin shape, use the public `IBuiltinScalar...` constraint matching the element capability; do not expose implementation-level `__Builtin...` markers in the port.
+When the abstracted type itself is passed to `dot`, consider `IDotProduct`, which covers built-in numeric scalars and ordinary vectors and returns the logical scalar type.
+These interfaces require `import slang.numerics;` and a compiler invocation with `-experimental-feature`.
+If the task's compiler or standard modules do not provide them, report that compatibility boundary instead of silently substituting legacy constraints.
+
 Read [references/contracts-and-extensions.md](references/contracts-and-extensions.md) when declaring interfaces, conformances, or constrained extensions.
 
 ## Preserve finite value-dependent overloads

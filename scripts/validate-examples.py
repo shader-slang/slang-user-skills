@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_FAILURES = {
-    "sealed-builtin-negative.slang": "__BuiltinArithmeticType",
+    "sealed-builtin-negative.slang": "does not conform to the required interface '__BuiltinArithmeticType'",
 }
 
 

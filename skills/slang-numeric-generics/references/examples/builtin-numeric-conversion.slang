@@ -2,14 +2,14 @@
 
 import slang.numerics;
 
-T addBuiltinFloat<T : IFractional, S : __BuiltinFloatingPointType>(T left, S right)
+T addBuiltinFloat<T : IFractional, S : IBuiltinScalarFloatingPointType>(T left, S right)
 {
     return left + T(right);
 }
 
 vector<TargetScalar, N> convertBuiltinVector<
-    TargetScalar : __BuiltinFloatingPointType & IScalarFractional,
-    SourceScalar : __BuiltinFloatingPointType,
+    TargetScalar : IBuiltinScalarFractional,
+    SourceScalar : IBuiltinScalarFloatingPointType,
     int N>(vector<SourceScalar, N> source)
 {
     vector<TargetScalar, N> result;
