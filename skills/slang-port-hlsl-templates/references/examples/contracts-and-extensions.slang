@@ -18,18 +18,37 @@ extension<T> FixedPair<T> : IReadable<T>
     }
 }
 
-extension<T, C : IReadable<T>> C
+interface IConvertTo<Destination>
 {
-    T first()
+    Destination convert();
+}
+
+struct RawInt : IConvertTo<int>
+{
+    int value;
+
+    int convert()
     {
-        return this.read(0);
+        return value;
+    }
+}
+
+extension<Destination> FixedPair<Destination>
+{
+    static FixedPair<Destination> convertFrom<Source : IConvertTo<Destination>>(
+        FixedPair<Source> source)
+    {
+        return {{
+            source.values[0].convert(),
+            source.values[1].convert(),
+        }};
     }
 }
 
 T readFirst<T, C>(C values)
     where C : IReadable<T>
 {
-    return values.first();
+    return values.read(0);
 }
 
 RWStructuredBuffer<int> outputBuffer;
@@ -39,5 +58,7 @@ RWStructuredBuffer<int> outputBuffer;
 void main()
 {
     FixedPair<int> values = {{3, 5}};
-    outputBuffer[0] = readFirst<int>(values);
+    FixedPair<RawInt> wrapped = {{{7}, {11}}};
+    FixedPair<int> converted = FixedPair<int>.convertFrom(wrapped);
+    outputBuffer[0] = readFirst<int>(values) + converted.values[1];
 }

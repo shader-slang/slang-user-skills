@@ -49,8 +49,8 @@ def main() -> int:
             diagnostic = completed.stdout + completed.stderr
             expected_diagnostic = EXPECTED_FAILURES.get(source.name)
             if expected_diagnostic is None:
-                passed = completed.returncode == 0
-                expectation = "compile"
+                passed = completed.returncode == 0 and not diagnostic.strip()
+                expectation = "compile without diagnostics"
             else:
                 passed = completed.returncode != 0 and expected_diagnostic in diagnostic
                 expectation = "expected rejection"
