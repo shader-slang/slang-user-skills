@@ -44,6 +44,10 @@ If the task's compiler or standard modules do not provide them, report that comp
 
 Read [references/contracts-and-extensions.md](references/contracts-and-extensions.md) when declaring interfaces, conformances, or constrained extensions.
 
+Every generic parameter on an extension should be determined by the extended type.
+When an additional type or value parameter is used only by one operation, declare it on that member.
+The member can constrain its new parameter in terms of the extension's parameters, but it cannot add a new constraint to an existing extension parameter; use a free generic function when the natural contract requires both parameters to be constrained together.
+
 ## Preserve finite value-dependent overloads
 
 A generic body is checked while a value parameter such as `N` is abstract.
@@ -59,6 +63,10 @@ Use this decision order:
 3. If neither formulation is expressible without changing semantics, report the minimized language limitation.
 
 Read [references/finite-value-dispatch.md](references/finite-value-dispatch.md) for complete patterns and a counterexample that does not refine a dependent type.
+
+Do not expect a scalar-to-`vector<T, 1>` conversion to lift through an array or another generic wrapper.
+For example, `T[N]` and `vector<T, 1>[N]` remain different parameter types.
+Preserve the declared shape with an exact overload or an explicit element-wise adapter; if the value is passed by `inout` or aliases storage, confirm that copying and writing back preserves the source behavior.
 
 ## Validate behavior, not just compilation
 

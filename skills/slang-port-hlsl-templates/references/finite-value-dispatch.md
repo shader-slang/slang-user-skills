@@ -20,6 +20,10 @@ int sumSupported<int N>(int values[N])
 Do not change a finite `N = 1, 2, 3` contract into an unbounded loop unless the source contract was already unbounded.
 Use the generic loop only when it is equivalent to every source overload.
 
+Replace or rename the original overload family coherently.
+Adding an overlapping catch-all generic beside concrete overloads with the same name can make calls ambiguous or cause a wrapper to call itself.
+When the original names must remain, give the new shared implementation a distinct helper name and make each public overload delegate to it explicitly.
+
 ## Specialized conformance dispatch
 
 When the implementations are materially different, use a dispatcher with one conformance per supported value:

@@ -12,12 +12,12 @@ T.Mask componentLess<T : IComponentwiseOrdered>(T left, T right)
 
 bool allLess<T : IComponentwiseOrdered>(T left, T right)
 {
-    return all(left < right);
+    return (left < right).all();
 }
 ```
 
 Preserve component-wise semantics.
-Reduce with `all` or `any` only when the source algorithm requires one Boolean result.
+Reduce with the mask's `all()` or `any()` operation only when the source algorithm requires one Boolean result.
 
 ## Scalar-to-shaped values
 

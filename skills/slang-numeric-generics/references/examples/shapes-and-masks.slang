@@ -13,9 +13,9 @@ T.Mask componentLess<T : IComponentwiseOrdered>(T left, T right)
     return left < right;
 }
 
-bool allLess<T : IComponentwiseOrdered>(T left, T right)
+bool allComponentsLess<T : IComponentwiseOrdered>(T left, T right)
 {
-    return all(left < right);
+    return (left < right).all();
 }
 
 RWStructuredBuffer<float4> outputBuffer;
@@ -26,5 +26,7 @@ void main()
 {
     float3 value = weightedSum(float3(1.0), float3(3.0), 0.25);
     vector<bool, 3> mask = componentLess(value, float3(4.0));
-    outputBuffer[0] = float4(value, all(mask) && allLess(value, float3(4.0)) ? 1.0 : 0.0);
+    outputBuffer[0] = float4(
+        value,
+        mask.all() && allComponentsLess(value, float3(4.0)) ? 1.0 : 0.0);
 }

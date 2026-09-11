@@ -24,6 +24,16 @@ Resource types and value arrays have different mutation models; do not force the
 An `inout` argument must designate writable storage of the required type.
 When a swizzle, property, or converted expression does not, use a temporary and write it back explicitly if that preserves the source behavior.
 
+## Scalars and one-component vectors
+
+Do not assume that a conversion between `T` and `vector<T, 1>` is lifted through an array, resource, wrapper, or generic type argument.
+For example, `float[Count]` does not satisfy a parameter of type `vector<float, 1>[Count]` merely because an individual `float` can initialize a one-component vector.
+
+When storage identity is not required, adapt each element explicitly while preserving order and write back modified values when necessary.
+When the source depends on aliasing, `inout`, or an exact layout, prefer an exact overload or report the type-system gap rather than treating the aggregates as interchangeable.
+
+See the compiler-checked [one-component vector example](examples/scalar-vector-one.slang).
+
 ## Declarations and constants
 
 A forward declaration followed by a full definition can be diagnosed as a conflicting declaration in native Slang.

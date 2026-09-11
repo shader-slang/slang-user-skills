@@ -40,6 +40,38 @@ Prefer a read-only contract when the body only reads.
 
 ## Constrained extensions
 
+Every generic parameter declared by an extension should be determined by the extended type.
+If a type parameter appears only in one member signature or constraint, declare it on that member instead of on the extension.
+
+For example, `Source` belongs on `convertFrom` because it is not part of `Box<Destination>`:
+
+```slang
+interface IConvertTo<Destination>
+{
+    Destination convert();
+}
+
+struct Box<T>
+{
+    T value;
+}
+
+extension<Destination> Box<Destination>
+{
+    static Box<Destination> convertFrom<Source : IConvertTo<Destination>>(Box<Source> source)
+    {
+        return { source.value.convert() };
+    }
+}
+```
+
+Putting `Source` on the extension would leave it independent of the target type.
+Slang can warn that such an extension is non-standard and may not make the member available as intended.
+
+A member constraint can constrain its own `Source` parameter in terms of `Destination`, as above.
+It cannot add a new constraint to the extension's existing `Destination` parameter.
+If the natural contract is instead `Destination : IConvertFrom<Source>`, use a free generic function that owns both parameters, or redesign the contract without reversing its meaning merely to fit an extension.
+
 Put generic parameters and their constraints before the extended type:
 
 ```slang
