@@ -9,6 +9,29 @@ license: Apache-2.0 WITH LLVM-exception
 Preserve the source algorithm and the full supported specialization domain.
 Do not specialize only for visible call sites or delete dormant template declarations to make one entry point compile.
 
+## Use semantic fidelity as the completion gate
+
+Compilation is necessary evidence, but it is not completion.
+Before the first edit, make a compact ledger that maps each source declaration, overload, type or
+value parameter, operation, and mutation to its intended Slang counterpart.
+Before reporting success, reopen the original and final source side by side and reject the port if
+any ledger row fails one of these checks:
+
+- Every requested declaration and materially distinct overload still has a real generic
+  implementation.
+- Independent source roles remain independently quantified unless the source contract proves that
+  their types are equal; a concrete call where roles happen to share a type is not such proof.
+- Every operation used by a generic body has a corresponding constraint, and every introduced
+  interface requirement has a real implementation for each claimed conformance.
+- Comparison operands, predicate direction, equality tests, index units, and returned values retain
+  their source meaning.
+- Every source mutation reaches the same logical storage before the same downstream observation;
+  temporaries have explicit, complete writeback when needed.
+- Finite value-specialized cases and uninstantiated but supported type categories remain expressible.
+
+Use compiler diagnostics to repair typing and language differences, then perform this source audit
+independently of whether the final compilation passes.
+
 ## Consult the companion guidance when its trigger applies
 
 Treat the companion skills as required parts of this workflow, not optional references:
