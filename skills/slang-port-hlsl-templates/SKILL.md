@@ -127,6 +127,13 @@ Compile representative matrix rows with temporary probes when the harness permit
 At minimum, compile the captured call and audit every uninstantiated row against the final source.
 Do not add permanent test-only calls to the shader merely to force an instantiation.
 
+Follow the concrete-path and source-diff audit in
+[the base porting skill's semantic-validation reference](../slang-port-hlsl/references/semantic-validation.md).
+In particular, inspect every changed predicate, guard, side effect, index unit, conversion, and
+copyback, and trace each operation in a new interface through every relevant conformance.
+Do not infer equality from comparator equivalence unless the source contract explicitly makes
+those relations identical.
+
 Prefer a readable sufficient constraint such as `IReal`, `IScalarReal`, or an appropriate `IBuiltinScalar...` alias over delaying or compromising a faithful port in pursuit of the narrowest possible interface.
 Constraint precision is a maintainability concern; semantic success is the gate.
 

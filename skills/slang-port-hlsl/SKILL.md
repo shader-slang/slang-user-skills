@@ -37,6 +37,10 @@ Minimize the earliest unexpected diagnostic before undertaking a broad rewrite, 
 Keep general compatibility changes separate from template-to-generic changes in the porting log.
 Read [references/common-differences.md](references/common-differences.md) when one of these language differences is involved.
 
+When the port introduces an adapter, interface, conformance, wrapper, temporary for mutation, or
+control-flow rewrite, follow the source-diff and concrete-path audit in
+[references/semantic-validation.md](references/semantic-validation.md).
+
 ## Stop before weakening behavior
 
 Do not replace a body with a default value, bypass a wave or resource operation, discard a write, remove a synchronization or memory qualifier, or narrow the supported specialization domain merely to make the program compile.
@@ -50,5 +54,10 @@ Before finishing, audit consequential changes to:
 - wave operations, barriers, thread-group sizes, and wave-size contracts;
 - casts, component selection, and scalar-versus-shaped behavior;
 - entry points and emitted artifacts.
+
+Compare the final source with the baseline rather than relying on memory or on the porting report.
+Trace every introduced abstraction through the concrete implementation used by each relevant call
+site; a complete-looking interface is not evidence that its conformances preserve the source
+behavior.
 
 Run every supplied verification command and preserve any required append-only attempt log.
