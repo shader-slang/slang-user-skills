@@ -51,6 +51,8 @@ Escalate only when another operation requires it.
 
 When the operation inventory is broad or incomplete during a port, use `IScalarReal` as the readable scalar default or `IReal` as the scalar-or-shaped default.
 Narrow it once the contract is understood.
+Do not sacrifice a correct, complete port to obtain the narrowest theoretically possible constraint.
+A broad public umbrella interface is preferable to an incomplete body, a narrowed specialization domain, or an unvalidated custom contract.
 
 `IDotProduct` is independent of `INumeric` and `IReal`.
 Conjoin it with the arithmetic capability when the same body uses both, for example `T : IReal & IDotProduct`.
@@ -91,6 +93,7 @@ These public aliases describe both the compiler-supported source representation 
 
 Numeric conversion is not bit reinterpretation.
 Never substitute `bit_cast`, a same-type copy, a default value, or one-component splatting for component-wise value conversion.
+Check every source/destination category that the original abstraction supported; compiling one concrete conversion does not establish the others.
 Read [references/shapes-and-conversions.md](references/shapes-and-conversions.md) for masks, splats, and conversions.
 
 ## Keep extensible and builtin-representation contracts distinct
@@ -138,6 +141,14 @@ Use this bounded repair order:
 4. Add an `IBuiltinScalar...` requirement only for an actual builtin representation or builtin-only intrinsic.
 5. If the source operation is provably component-wise and only a scalar overload exists, introduce one narrow same-shaped adapter that preserves the operation, shape, and element order.
 6. If faithful conversion, reduction, mask, or shape-rebinding semantics cannot be expressed, preserve the coherent port and report the minimized compiler or library gap.
+
+Before declaring success, audit the operation families that triggered this skill:
+
+- Numeric construction and conversion must preserve values and every component; a cast, constructor, bit reinterpretation, and scalar splat are not interchangeable.
+- Ordered comparisons must preserve operand direction and scalar-versus-mask result shape; explicitly check both equality and inequality when the source uses both.
+- Floating-point `min` and `max` replacements must preserve the source's NaN and signed-zero behavior.
+- A wave intrinsic must preserve the source intrinsic, operand, lane-index behavior, and mode; a builtin-representation diagnostic is a constraint problem, not permission to bypass or approximate the operation.
+- A custom numeric conformance must implement the claimed inherited contract, not merely enough members for one visible call to compile.
 
 Do not replace floating-point `min` or `max` with a comparison ternary without verifying NaN semantics.
 Do not reduce a comparison mask to `bool` unless the source algorithm requires a reduction.

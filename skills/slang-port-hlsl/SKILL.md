@@ -30,6 +30,7 @@ Minimize the earliest unexpected diagnostic before undertaking a broad rewrite, 
 - Preserve element-wise casts and matrix element order.
   Do not replace a vector conversion with component-zero extraction and splatting.
 - Preserve memory and synchronization semantics, including `globallycoherent`, barriers, wave operations, and thread-group contracts.
+  When a generic operand is rejected by a wave intrinsic, constrain or adapt the operated type without changing the intrinsic, its operand, its lane index, or its mode.
 - Check the binding and lifetime behavior of resource-bearing `static const` aggregates before translating them into Slang constants.
 
 Keep general compatibility changes separate from template-to-generic changes in the porting log.
