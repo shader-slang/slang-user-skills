@@ -130,6 +130,31 @@ Do not expect a scalar-to-`vector<T, 1>` conversion to lift through an array or 
 For example, `T[N]` and `vector<T, 1>[N]` remain different parameter types.
 Preserve the declared shape with an exact overload or an explicit element-wise adapter; if the value is passed by `inout` or aliases storage, confirm that copying and writing back preserves the source behavior.
 
+## Preserve mutation across compatibility adapters
+
+Treat every new temporary that replaces an HLSL `inout` argument, swizzle l-value, property, or
+mutating generic receiver as a possible behavior change.
+Prefer calling the mutating operation on the original variable when Slang permits it.
+When Slang requires a temporary, copy the complete logical value in, perform the operation, and
+write the complete modified value back before any downstream read that observed the mutation in the
+source:
+
+```slang
+uint3 temporary = state.encoded.yzw;
+reorder(temporary);
+state.encoded.yzw = temporary;
+```
+
+Do not create a fresh copy inside a loop merely to satisfy a `[mutating]` call when the source passed
+the persistent generic variable by `inout`; mutations to that copy would be discarded before the
+next iteration.
+If a copy is unavoidable, copy it back at the same semantic boundary as the source operation.
+
+Before finishing, compare every source `inout` call with its final counterpart and record the
+source storage, any temporary or copied receiver, the writeback, and the first downstream read.
+Compilation cannot reveal a missing writeback when the affected path is inactive or when the stale
+value remains well typed.
+
 ## Validate behavior, not just compilation
 
 Run the supplied Slang compiler after each coherent change.

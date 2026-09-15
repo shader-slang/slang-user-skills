@@ -24,6 +24,13 @@ Check these high-risk edits directly:
 - receiver mutation, `inout` temporaries, aliasing, and explicit copyback; and
 - returned values, output parameters, offsets, counts, and forwarding overloads.
 
+For every final local initialized from an expression that the source passed by `inout`, trace the
+local through the call and find the assignment that copies the modified value back to the original
+storage.
+For every copied generic receiver, verify that the source also used a copy; otherwise call the
+mutating operation on the persistent variable or restore its complete state before the next
+source-visible read or loop iteration.
+
 Preserve the source predicate as written unless its contract establishes an equivalent
 replacement.
 In particular, `compare(a, b) == 0` is not evidence that `a == b`: a comparator can group distinct
