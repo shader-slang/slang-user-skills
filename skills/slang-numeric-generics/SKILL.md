@@ -43,6 +43,8 @@ Use the non-scalar interface when the parameter itself may be a scalar, vector, 
 
 A constraint on an element or payload does not automatically provide operations on a constructed vector, matrix, array, or user wrapper.
 Confirm the shaped type's conformance or constrain the type actually used by the operation.
+Do not give a storage wrapper the strongest constraint used by one operation when the wrapper also represents Boolean masks, integers, or other categories.
+Keep the wrapper's representation domain broad and move the stronger capability to a constrained extension or free function.
 
 ## Select the narrowest useful capability
 
@@ -56,6 +58,21 @@ A broad public umbrella interface is preferable to an incomplete body, a narrowe
 
 `IDotProduct` is independent of `INumeric` and `IReal`.
 Conjoin it with the arithmetic capability when the same body uses both, for example `T : IReal & IDotProduct`.
+
+When the generic parameter is the scalar element of an explicitly constructed vector, constrain the constructed vector directly to retain every conforming scalar category:
+
+```slang
+vector<T, N>.Scalar innerProduct<
+    T : IBuiltinScalarShapedType,
+    let N : int>(vector<T, N> left, vector<T, N> right)
+    where vector<T, N> : IDotProduct
+{
+    return dot(left, right);
+}
+```
+
+This admits both builtin integer and floating-point vectors.
+Do not narrow the element to floating point merely because two core `dot` overload families are involved.
 
 Important distinctions include:
 
@@ -91,6 +108,11 @@ Prefer `T(value)` through `INumeric` or `IFractional` over calling an internal c
 When the source value has a generic builtin type, constrain that source with `IBuiltinScalarIntegerType` or `IBuiltinScalarFloatingPointType`.
 These public aliases describe both the compiler-supported source representation and its scalar capability.
 
+When both source and destination range across builtin Boolean, integer, and floating-point scalar representations, constrain them with `IBuiltinScalarTypeDispatchMarker` and use `convertBuiltinScalar<TDestination>(value)`.
+That operation performs a value conversion; it does not reinterpret bits.
+Apply it independently to every component of a vector, matrix, or user wrapper when no same-shaped overload is available.
+Never route the conversion through `float` or another narrower intermediate, because that loses precision and excludes source categories.
+
 Numeric conversion is not bit reinterpretation.
 Never substitute `bit_cast`, a same-type copy, a default value, or one-component splatting for component-wise value conversion.
 Check every source/destination category that the original abstraction supported; compiling one concrete conversion does not establish the others.
@@ -107,6 +129,10 @@ If no convenience alias includes an independent operation family, conjoin it exp
 
 Do not spell implementation-level `__Builtin...` markers in user-facing code when a corresponding `IBuiltinScalar...` alias expresses the contract.
 Do not redundantly repeat the scalar capability already included in an `IBuiltinScalar...` alias.
+
+`IBuiltinScalarTypeDispatchMarker` is the public escape hatch for a genuinely builtin-only operation that spans Boolean, integer, and floating-point scalar representations, such as a generic wave communication or cross-builtin conversion.
+It proves representation dispatch only and supplies no arithmetic operations.
+Add a capability interface separately when the same body performs arithmetic.
 
 Do not fall back to legacy `IArithmetic`, `IFloat`, or `IComparable` when the capability-oriented interfaces express the contract.
 Read [references/public-versus-builtin.md](references/public-versus-builtin.md) when a builtin-representation constraint appears necessary.

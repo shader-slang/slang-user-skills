@@ -50,4 +50,19 @@ The destination remains constrained by its public mathematical capability.
 
 For component-wise conversion, construct every destination component from its corresponding source component.
 Do not convert one component and splat it.
+
+When the source and destination are both generic builtin scalar representations, ordinary construction can be ambiguous because no single extensible interface describes every cross-category conversion.
+Use the public builtin conversion operation instead:
+
+```slang
+TDestination convertValue<
+    TDestination : IBuiltinScalarTypeDispatchMarker,
+    TSource : IBuiltinScalarTypeDispatchMarker>(TSource value)
+{
+    return convertBuiltinScalar<TDestination>(value);
+}
+```
+
+For a shaped value, loop over its logical components and call `convertBuiltinScalar` once per component.
+This preserves signedness changes, integer-to-floating-point and floating-point-to-integer conversions, Boolean conversions, and wider floating-point destinations without routing through an intermediate representation.
 See the compiler-checked [conversion example](examples/builtin-numeric-conversion.slang).

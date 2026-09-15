@@ -2,6 +2,7 @@
 
 Public numeric interfaces describe capabilities that user-defined types can implement.
 Public `IBuiltinScalar...` aliases combine those capabilities with compiler-recognized representation domains and intentionally cannot be satisfied by user types.
+`IBuiltinScalarTypeDispatchMarker` exposes only the sealed builtin scalar representation domain and does not claim any numeric capability.
 
 Use a public contract when ordinary interface operations express the body:
 
@@ -33,5 +34,9 @@ If the body also needs an independent operation family, conjoin that interface e
 
 Do not use the implementation-level `__Builtin...` interfaces in user-facing code when a public alias covers the contract.
 For example, prefer `IBuiltinScalarFloatingPointType` over `__BuiltinFloatingPointType & IScalarFloatingPoint`.
+
+Use `IBuiltinScalarTypeDispatchMarker` when one builtin-only operation intentionally spans Boolean, integer, and floating-point scalar representations.
+Typical examples are generic wave communication and `convertBuiltinScalar`.
+Do not use it alone to justify addition, ordering, elementary functions, or any other mathematical operation.
 
 The compiler-checked [negative example](examples/sealed-builtin-negative.slang) confirms that a user-defined additive type cannot satisfy the builtin-representation constraint.

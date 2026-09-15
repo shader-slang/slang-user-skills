@@ -49,6 +49,7 @@ Otherwise express the body-derived contract:
 5. Validate the proposed contract in a small probe before restructuring a large shader.
 
 When the generic explicitly constructs `vector<T, N>`, `matrix<T, R, C>`, or another builtin shape, start with the public `IBuiltinScalar...` constraint matching the element capability; do not expose implementation-level `__Builtin...` markers in the port.
+When the same storage abstraction must admit Boolean, integer, and floating-point elements for a builtin-only intrinsic, use `IBuiltinScalarTypeDispatchMarker` on the stored element type and put arithmetic capabilities on the operations that need them.
 When the abstracted type itself is passed to `dot`, consider `IDotProduct`, which covers built-in numeric scalars and ordinary vectors and returns the logical scalar type.
 These interfaces require `import slang.numerics;` and a compiler invocation with `-experimental-feature`.
 If the task's compiler or standard modules do not provide them, report that compatibility boundary instead of silently substituting legacy constraints.
@@ -58,6 +59,36 @@ Read [references/contracts-and-extensions.md](references/contracts-and-extension
 Every generic parameter on an extension should be determined by the extended type.
 When an additional type or value parameter is used only by one operation, declare it on that member.
 The member can constrain its new parameter in terms of the extension's parameters, but it cannot add a new constraint to an existing extension parameter; use a free generic function when the natural contract requires both parameters to be constrained together.
+
+## Separate storage domains from operation domains
+
+Do not constrain an entire wrapper to the strongest operation used by one of its members.
+A wrapper that stores both numeric values and Boolean masks can often remain generic over the builtin representation while arithmetic, ordering, reciprocal, or dot-product operations use free generic functions or constrained extensions for ordinary named methods.
+
+Slang checks a generic body against its declared constraints before any concrete specialization proves more facts.
+Leaving the body unconstrained is therefore invalid even when every visible call uses `float`.
+Conversely, constraining the wrapper itself to `IScalarReal` or `IBuiltinScalarReal` excludes integer and Boolean instantiations from storage members that do not require real arithmetic.
+
+Use this pattern when operations need a stronger contract than storage:
+
+```slang
+struct Packet<T : IBuiltinScalarTypeDispatchMarker, let N : int>
+{
+    vector<T, N> value;
+}
+
+Packet<T, N> operator+<T : IBuiltinScalarAdditive, let N : int>(
+    Packet<T, N> left,
+    Packet<T, N> right)
+{
+    return { left.value + right.value };
+}
+```
+
+The free operator owns the stronger arithmetic contract while `Packet<bool, N>` remains a valid storage type.
+Use a constrained extension for an ordinary named method when all its generic parameters are determined by the extended type.
+Current Slang operator lookup does not reliably discover an operator declared only in a constrained extension, so port member operators that need stronger constraints as free generic operators and preserve the original operator syntax at call sites.
+Do not append a `where` clause to a non-generic member in an attempt to strengthen an enclosing type parameter; move that member to a constrained extension, or to a free function when it is an operator or independently constrains multiple types.
 
 ## Preserve finite value-dependent overloads
 

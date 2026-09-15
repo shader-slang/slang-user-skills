@@ -93,4 +93,15 @@ extension<T : IScalarAdditive> Pair<T> : IAdditive
 }
 ```
 
+Use constrained extensions this way for ordinary named members.
+Current Slang operator lookup does not reliably find an operator declared only in a constrained extension.
+When a source member operator needs a stronger constraint than its wrapper, preserve operator syntax with a free generic operator instead:
+
+```slang
+Pair<T> operator+<T : IScalarAdditive>(Pair<T> left, Pair<T> right)
+{
+    return { left.first + right.first, left.second + right.second };
+}
+```
+
 See the compiler-checked [contract example](examples/contracts-and-extensions.slang).
