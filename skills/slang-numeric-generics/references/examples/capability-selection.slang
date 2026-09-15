@@ -12,7 +12,7 @@ bool scalarLess<T : IScalarReal>(T left, T right)
     return left < right;
 }
 
-T shapedClamp<T : IReal>(T value, T lower, T upper)
+T shapedClamp<T : INumericalExtrema>(T value, T lower, T upper)
 {
     return clamp(value, lower, upper);
 }

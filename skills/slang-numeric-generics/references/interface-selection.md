@@ -16,13 +16,16 @@ The scalar-or-shaped column accepts component-wise vector and matrix behavior wh
 | Signed or unsigned integer behavior | `ISignedIntegerType`, `IUnsignedIntegerType` | corresponding `IScalar...` refinement |
 | Component-wise equality | `IComponentwiseEquatable` | `IEquatable` when a scalar `bool` is required |
 | Component-wise relational comparison | `IComponentwiseOrdered` | `IPartiallyOrdered` or `ITotallyOrdered` |
+| Component-wise `min`, `max`, `clamp`, and related extrema | `INumericalExtrema` | `INumericalExtrema & IScalarShapedType` when scalar-only must be explicit |
 | One elementary-function family | corresponding independent family | add `IScalarShapedType` if scalar-only |
 | All elementary-function families | `IElementaryFunctions` | `IScalarElementaryFunctions` |
-| Fractional arithmetic, elementary functions, component-wise ordering, `min`, `max`, and `step` | `IReal` | `IScalarReal` |
+| Fractional arithmetic, elementary functions, component-wise ordering, extrema, and `step` | `IReal` | `IScalarReal` |
 
 Use capability conjunctions when appropriate.
 For example, `IFractional & IRootFunctions` is preferable to `IReal` when the body needs arithmetic and square roots but no ordering or other elementary functions.
 Because `IDotProduct` is independent of the arithmetic hierarchy, a body that also uses real arithmetic should state `IReal & IDotProduct`.
+Because `INumericalExtrema` is independent of integer and fractional arithmetic, use it directly
+when extrema are the only common operation across those domains.
 
 `IFloatingPoint` is not a synonym for real-number operations, and `IReal` does not require an IEEE floating-point representation.
 Use `IPartiallyOrdered` for IEEE-style scalar comparisons and `ITotallyOrdered` only when the type guarantees a total order.

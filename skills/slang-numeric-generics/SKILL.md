@@ -2,7 +2,6 @@
 name: slang-numeric-generics
 description: Select and use Slang's capability-oriented numeric interfaces when writing or porting generic numeric code. Use for scalar-versus-shaped constraints, dot products, component masks, scalar splats, builtin conversion, wrapper or custom-number conformances, compound arithmetic, elementary functions, or builtin-representation constraints.
 license: Apache-2.0 WITH LLVM-exception
-compatibility: Requires a Slang build that provides the experimental slang.numerics module; compile with -experimental-feature.
 ---
 
 # Use Slang Numeric Generics
@@ -79,11 +78,15 @@ Important distinctions include:
 - `IAdditive` supplies addition, subtraction, and zero.
 - `INumeric` adds same-type multiplication, one, and construction from builtin integer types.
 - `ISignedNumeric` adds negation and absolute value.
+- `INumericalExtrema` supplies component-wise `min`, `max`, `clamp`, and related extrema helpers
+  for numeric types, including built-in integer and floating-point scalars and vectors.
 - `IDotProduct` independently supplies `dot(left, right)`, returning `T.Scalar`; built-in numeric scalars and ordinary vectors conform, but matrices and cooperative vectors currently do not.
 - `IFractional` adds division, reciprocal, and construction from builtin floating-point types without requiring an IEEE representation or elementary functions.
 - `IFloatingPoint` adds representation-specific rounding, remainder, splitting, sign-copying, and classification.
 - Elementary-function families are independent capabilities and can be joined with `&`.
-- `IReal` is a convenience conjunction for fractional arithmetic, elementary functions, component-wise ordering, and real-ordering functions such as `min`, `max`, and `step`.
+- `IRealOrderingFunctions` refines `INumericalExtrema` with `step`.
+- `IReal` is a convenience conjunction for fractional arithmetic, elementary functions,
+  component-wise ordering, numerical extrema, and `step`.
 - `IComponentwiseOrdered` returns a same-shaped mask.
   Use `IPartiallyOrdered` or `ITotallyOrdered` when comparisons must return one scalar `bool`.
 
