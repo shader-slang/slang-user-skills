@@ -18,7 +18,13 @@ Treat the companion skills as required parts of this workflow, not optional refe
 - Read [references/finite-value-dispatch.md](references/finite-value-dispatch.md) before changing a dependent array or a call from a value-generic body to a finite family of fixed-size overloads.
 
 Apply every triggered companion before the first large source rewrite.
-If a named skill is not installed, continue with the guidance in this skill and record that the companion guidance was unavailable.
+When the agent supports explicit skill loading, invoke each triggered skill by its exact name rather
+than only searching the installed files for related terms.
+If `slang-numeric-generics` cannot be loaded, use this conservative fallback: import
+`slang.numerics`, use `IEquatable`, `IPartiallyOrdered`, or `ITotallyOrdered` for scalar comparison,
+use the corresponding component-wise interfaces for shaped comparisons, and start broad arithmetic
+ports with `IScalarReal` or `IReal` rather than a legacy numeric interface.
+Record that the companion guidance was unavailable.
 
 ## Inventory the abstraction before editing
 
@@ -47,6 +53,20 @@ Otherwise express the body-derived contract:
 4. Constrain the type on which the operations are actually invoked.
    Constraining a wrapper's element does not automatically make the wrapper conform.
 5. Validate the proposed contract in a small probe before restructuring a large shader.
+
+Keep independent source parameters independent unless the source contract equates them.
+A visible specialization where the buffer element, key, and comparator operand happen to be the
+same type does not justify collapsing those roles in the generic port.
+Model cross-type relationships with separate interface parameters, associated types, or an adapter
+operation instead of forcing one type argument everywhere.
+
+Give each generic body only the operations it uses.
+Do not take the union of operations across several overloads or members and force every concrete
+type through one catch-all interface.
+Use small sibling interfaces or refinements when operation sets differ, and put default-strategy
+constraints only on overloads that actually select that strategy.
+If a concrete type has no meaningful implementation of a requirement, leave it nonconforming or
+split the contract; never add an empty method, constant result, or dropped write to make it conform.
 
 When the generic explicitly constructs `vector<T, N>`, `matrix<T, R, C>`, or another builtin shape, start with the public `IBuiltinScalar...` constraint matching the element capability; do not expose implementation-level `__Builtin...` markers in the port.
 When the same storage abstraction must admit Boolean, integer, and floating-point elements for a builtin-only intrinsic, use `IBuiltinScalarTypeDispatchMarker` on the stored element type and put arithmetic capabilities on the operations that need them.
@@ -133,6 +153,9 @@ In particular, inspect every changed predicate, guard, side effect, index unit, 
 copyback, and trace each operation in a new interface through every relevant conformance.
 Do not infer equality from comparator equivalence unless the source contract explicitly makes
 those relations identical.
+For each conformance, verify that every required method implements corresponding source behavior.
+An empty or placeholder method is a semantic failure even when no current entry point instantiates
+that path.
 
 Prefer a readable sufficient constraint such as `IReal`, `IScalarReal`, or an appropriate `IBuiltinScalar...` alias over delaying or compromising a faithful port in pursuit of the narrowest possible interface.
 Constraint precision is a maintainability concern; semantic success is the gate.

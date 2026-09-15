@@ -3,6 +3,30 @@
 Infer a type parameter's contract from operations in the template body, not only from concrete arguments visible at current call sites.
 Keep the interface no broader than the body requires.
 
+## Preserve independent roles
+
+Do not merge independent source template parameters merely because one visible call gives them the
+same concrete argument.
+For example, keep the stored element and lookup key distinct when the source comparator accepts
+different types:
+
+```slang
+interface IReadable<Element>
+{
+    Element read(uint index);
+}
+
+interface ICompare<Element, Key>
+{
+    int compare(Element element, Key key);
+}
+```
+
+The generic caller can then own `Element`, `Key`, the readable container, and the comparator as
+separate parameters.
+If an operator relationship cannot be expressed directly as a Slang constraint, move that one
+operation into an adapter or strategy interface rather than equating the operand types.
+
 ## Constraint placement
 
 Constrain the type on which an operation is performed.
@@ -37,6 +61,13 @@ interface IAccumulator<T>
 
 Do not put writable value arrays and reference-backed writable resources behind one interface unless their mutation semantics genuinely match.
 Prefer a read-only contract when the body only reads.
+
+Different generic bodies over the same source type can require different contracts.
+Do not combine their requirements into one catch-all interface and then invent implementations for
+types that support only a subset.
+Use sibling interfaces or refinements, for example a read interface for `load`, a write refinement
+for `store`, and a separate lifecycle capability for `release`.
+An empty lifecycle method or a write that discards its value is not a valid conformance.
 
 ## Constrained extensions
 
