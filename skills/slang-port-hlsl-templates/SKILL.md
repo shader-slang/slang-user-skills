@@ -49,6 +49,17 @@ use the corresponding component-wise interfaces for shaped comparisons, and star
 ports with `IScalarReal` or `IReal` rather than a legacy numeric interface.
 Record that the companion guidance was unavailable.
 
+## Probe standard contracts before declaring local ones
+
+Do not invent a project-local interface until the supplied compiler has rejected the closest
+standard contract in a minimal probe.
+This is a decision gate, not a documentation lookup: installed source files may omit declarations
+and conformances embedded in the compiler's core module.
+In particular, when a generic body only reads elements by integer index, compile the exact
+`IArray<Element>` probe shown below before defining a custom read protocol.
+If it succeeds, use `IArray<Element>` throughout the port; if it fails, preserve the diagnostic in
+the porting log and introduce only the missing operation.
+
 ## Inventory the abstraction before editing
 
 For every template declaration and call site, record:
