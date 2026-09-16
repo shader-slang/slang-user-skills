@@ -86,6 +86,20 @@ read subscript.
 If the exact resource type in the supplied toolchain does not conform, introduce one narrow adapter
 or interface for the missing operation instead of assuming the conformance or broadening the
 algorithm's requirements.
+Do not infer that a core-module conformance is absent merely because it is not visible in installed
+`.slang` source files; many built-in declarations are embedded in the compiler.
+Compile an evaluation-only probe with the task's compiler and options, for example:
+
+```slang
+T readBuffer<T : ITexelElement>(Buffer<T> values, int index)
+    where Buffer<T> : IArray<T>
+{
+    return values[index];
+}
+```
+
+When that probe passes, prefer the standard contract even if the current algorithm does not call
+every member such as `getCount()`.
 
 Keep independent source parameters independent unless the source contract equates them.
 A visible specialization where the buffer element, key, and comparator operand happen to be the
