@@ -18,7 +18,7 @@ T shapedClamp<T : INumericalExtrema>(T value, T lower, T upper)
 }
 
 vector<T, N> builtinShapedClamp<
-    T : IBuiltinScalarArithmeticTypeDispatchMarker & INumericalExtrema,
+    T : IBuiltinScalarArithmetic,
     let N : int>(vector<T, N> value, vector<T, N> lower, vector<T, N> upper)
 {
     return clamp(value, min(value, lower), max(value, upper));

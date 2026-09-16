@@ -27,9 +27,9 @@ Because `IDotProduct` is independent of the arithmetic hierarchy, a body that al
 Because `INumericalExtrema` is independent of integer and fractional arithmetic, use it directly
 when extrema are the only common operation across those domains.
 For an explicitly constructed builtin vector or matrix whose element type remains generic across
-integer and floating-point representations, use
-`IBuiltinScalarArithmeticTypeDispatchMarker & INumericalExtrema` on the element.
-The shaped `min`, `max`, and `clamp` overloads in recent numerics modules accept that conjunction.
+integer and floating-point representations, use `IBuiltinScalarArithmetic` on the element.
+That public convenience contract includes ordinary scalar arithmetic and numerical extrema, and
+the shaped `min`, `max`, and `clamp` overloads in recent numerics modules accept it.
 This is intentionally broader than `IBuiltinScalarReal`.
 
 `IFloatingPoint` is not a synonym for real-number operations, and `IReal` does not require an IEEE floating-point representation.

@@ -81,8 +81,7 @@ Important distinctions include:
 - `INumericalExtrema` supplies component-wise `min`, `max`, `clamp`, and related extrema helpers
   for numeric types, including built-in integer and floating-point scalars and vectors.
   When a generic signature explicitly constructs `vector<T, N>` or `matrix<T, R, C>` and must
-  retain both domains, constrain the element as
-  `T : IBuiltinScalarArithmeticTypeDispatchMarker & INumericalExtrema`.
+  retain both domains, constrain the element as `T : IBuiltinScalarArithmetic`.
   Recent numerics modules provide shaped `min`, `max`, and `clamp` overloads for that contract;
   do not narrow the element to `IBuiltinScalarReal` merely to make overload resolution succeed.
 - `IDotProduct` independently supplies `dot(left, right)`, returning `T.Scalar`; built-in numeric scalars and ordinary vectors conform, but matrices and cooperative vectors currently do not.
@@ -137,6 +136,8 @@ They intentionally exclude user-defined numeric types, but unlike the implementa
 
 Use an `IBuiltinScalar...` constraint only when the implementation genuinely depends on a builtin representation, intrinsic, or shape constructor.
 For example, an explicit real-valued `vector<T, N>` can justify `T : IBuiltinScalarReal`.
+Use `IBuiltinScalarArithmetic` as the broad convenience contract when one implementation
+intentionally spans builtin integer and floating-point arithmetic and numerical extrema.
 If no convenience alias includes an independent operation family, conjoin it explicitly, as in `IBuiltinScalarFloatingPointType & ITrigonometricFunctions`.
 
 Do not spell implementation-level `__Builtin...` markers in user-facing code when a corresponding `IBuiltinScalar...` alias expresses the contract.
