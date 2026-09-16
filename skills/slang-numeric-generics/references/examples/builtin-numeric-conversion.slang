@@ -7,20 +7,6 @@ T addBuiltinFloat<T : IFractional, S : IBuiltinScalarFloatingPointType>(T left, 
     return left + T(right);
 }
 
-vector<TargetScalar, N> convertBuiltinVector<
-    TargetScalar : IBuiltinScalarTypeDispatchMarker,
-    SourceScalar : IBuiltinScalarTypeDispatchMarker,
-    int N>(vector<SourceScalar, N> source)
-{
-    vector<TargetScalar, N> result;
-    [unroll]
-    for (int component = 0; component < N; ++component)
-    {
-        result[component] = convertBuiltinScalar<TargetScalar>(source[component]);
-    }
-    return result;
-}
-
 RWStructuredBuffer<float4> outputBuffer;
 
 [shader("compute")]
@@ -28,9 +14,11 @@ RWStructuredBuffer<float4> outputBuffer;
 void main()
 {
     vector<half, 3> source = vector<half, 3>(half(1.0), half(2.0), half(3.0));
-    vector<float, 3> converted = convertBuiltinVector<float, half, 3>(source);
+    vector<float, 3> converted = convertBuiltinVector<float>(source);
+    matrix<float, 2, 2> convertedMatrix =
+        convertBuiltinMatrix<float>(matrix<half, 2, 2>(half(1.0), half(2.0), half(3.0), half(4.0)));
     uint convertedInteger = convertBuiltinScalar<uint>(converted[0]);
     outputBuffer[0] = float4(
         converted,
-        addBuiltinFloat(1.0, half(0.5)) + float(convertedInteger));
+        addBuiltinFloat(1.0, half(0.5)) + float(convertedInteger) + convertedMatrix[0][0]);
 }

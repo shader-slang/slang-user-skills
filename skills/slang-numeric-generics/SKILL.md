@@ -113,7 +113,11 @@ These public aliases describe both the compiler-supported source representation 
 
 When both source and destination range across builtin Boolean, integer, and floating-point scalar representations, constrain them with `IBuiltinScalarTypeDispatchMarker` and use `convertBuiltinScalar<TDestination>(value)`.
 That operation performs a value conversion; it does not reinterpret bits.
-Apply it independently to every component of a vector, matrix, or user wrapper when no same-shaped overload is available.
+Use `convertBuiltinVector<TDestination>(value)` or `convertBuiltinMatrix<TDestination>(value)`
+when the source is a builtin vector or matrix and the supplied numerics module provides those
+helpers.
+For an older module or a user-defined wrapper, apply `convertBuiltinScalar` independently to every
+logical component.
 Never route the conversion through `float` or another narrower intermediate, because that loses precision and excludes source categories.
 
 Numeric conversion is not bit reinterpretation.

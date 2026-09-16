@@ -63,6 +63,20 @@ TDestination convertValue<
 }
 ```
 
-For a shaped value, loop over its logical components and call `convertBuiltinScalar` once per component.
-This preserves signedness changes, integer-to-floating-point and floating-point-to-integer conversions, Boolean conversions, and wider floating-point destinations without routing through an intermediate representation.
+For a builtin vector or matrix, use the corresponding same-shaped helper:
+
+```slang
+vector<TDestination, N> convertVector<
+    TDestination : IBuiltinScalarTypeDispatchMarker,
+    TSource : IBuiltinScalarTypeDispatchMarker,
+    let N : int>(vector<TSource, N> value)
+{
+    return convertBuiltinVector<TDestination>(value);
+}
+```
+
+`convertBuiltinMatrix<TDestination>` provides the analogous matrix operation.
+When the supplied numerics module predates these helpers, or when the shape is a user-defined
+wrapper, loop over its logical components and call `convertBuiltinScalar` once per component.
+Both approaches preserve signedness changes, integer-to-floating-point and floating-point-to-integer conversions, Boolean conversions, and wider floating-point destinations without routing through an intermediate representation.
 See the compiler-checked [conversion example](examples/builtin-numeric-conversion.slang).
