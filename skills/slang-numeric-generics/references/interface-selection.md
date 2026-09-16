@@ -43,6 +43,10 @@ For a built-in floating-point element plus one independent operation family, use
 
 `IDotProduct` applies when the constrained type itself is the scalar or vector passed to `dot`.
 Do not replace it with a scalar element constraint unless the generic signature explicitly constructs `vector<T, N>` and therefore operates on the element parameter separately.
+For that explicitly constructed builtin-vector case, recent numerics modules accept
+`T : IBuiltinScalarNumeric` directly and preserve signed-integer, unsigned-integer, and
+floating-point element domains. Older modules may require
+`where vector<T, N> : IDotProduct`; probe every required category before selecting that fallback.
 Matrices and cooperative vectors do not currently conform to `IDotProduct`.
 When `dot` must participate in automatic differentiation, import `slang.numerics.differentiable` and use `IDifferentiableDotProduct`.
 Built-in floating-point scalars and ordinary floating-point vectors already conform; a custom type must provide explicit forward- and reverse-mode derivative rules in addition to its base dot product.

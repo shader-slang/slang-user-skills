@@ -58,19 +58,23 @@ A broad public umbrella interface is preferable to an incomplete body, a narrowe
 `IDotProduct` is independent of `INumeric` and `IReal`.
 Conjoin it with the arithmetic capability when the same body uses both, for example `T : IReal & IDotProduct`.
 
-When the generic parameter is the scalar element of an explicitly constructed vector, constrain the constructed vector directly to retain every conforming scalar category:
+When the generic parameter is the scalar element of an explicitly constructed vector, recent
+numerics modules provide a direct builtin-vector adapter that retains integer and floating-point
+domains:
 
 ```slang
-vector<T, N>.Scalar innerProduct<
-    T : IBuiltinScalarShapedType,
+T innerProduct<
+    T : IBuiltinScalarNumeric,
     let N : int>(vector<T, N> left, vector<T, N> right)
-    where vector<T, N> : IDotProduct
 {
     return dot(left, right);
 }
 ```
 
-This admits both builtin integer and floating-point vectors.
+This admits both builtin integer and floating-point vectors. For an extensible scalar-or-shaped
+parameter, continue to constrain that operated type with `IDotProduct`. With an older numerics
+module that lacks the builtin-vector adapter, constrain the constructed type explicitly with
+`where vector<T, N> : IDotProduct` and probe every required element category.
 Do not narrow the element to floating point merely because two core `dot` overload families are involved.
 
 Important distinctions include:
@@ -137,7 +141,8 @@ They intentionally exclude user-defined numeric types, but unlike the implementa
 Use an `IBuiltinScalar...` constraint only when the implementation genuinely depends on a builtin representation, intrinsic, or shape constructor.
 For example, an explicit real-valued `vector<T, N>` can justify `T : IBuiltinScalarReal`.
 Use `IBuiltinScalarArithmetic` as the broad convenience contract when one implementation
-intentionally spans builtin integer and floating-point arithmetic and numerical extrema.
+intentionally spans builtin integer and floating-point arithmetic, component-wise comparisons,
+and numerical extrema.
 If no convenience alias includes an independent operation family, conjoin it explicitly, as in `IBuiltinScalarFloatingPointType & ITrigonometricFunctions`.
 
 Do not spell implementation-level `__Builtin...` markers in user-facing code when a corresponding `IBuiltinScalar...` alias expresses the contract.
