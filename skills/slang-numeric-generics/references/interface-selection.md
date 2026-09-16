@@ -26,6 +26,11 @@ For example, `IFractional & IRootFunctions` is preferable to `IReal` when the bo
 Because `IDotProduct` is independent of the arithmetic hierarchy, a body that also uses real arithmetic should state `IReal & IDotProduct`.
 Because `INumericalExtrema` is independent of integer and fractional arithmetic, use it directly
 when extrema are the only common operation across those domains.
+For an explicitly constructed builtin vector or matrix whose element type remains generic across
+integer and floating-point representations, use
+`IBuiltinScalarArithmeticTypeDispatchMarker & INumericalExtrema` on the element.
+The shaped `min`, `max`, and `clamp` overloads in recent numerics modules accept that conjunction.
+This is intentionally broader than `IBuiltinScalarReal`.
 
 `IFloatingPoint` is not a synonym for real-number operations, and `IReal` does not require an IEEE floating-point representation.
 Use `IPartiallyOrdered` for IEEE-style scalar comparisons and `ITotallyOrdered` only when the type guarantees a total order.

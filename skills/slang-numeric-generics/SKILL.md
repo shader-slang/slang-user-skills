@@ -80,6 +80,11 @@ Important distinctions include:
 - `ISignedNumeric` adds negation and absolute value.
 - `INumericalExtrema` supplies component-wise `min`, `max`, `clamp`, and related extrema helpers
   for numeric types, including built-in integer and floating-point scalars and vectors.
+  When a generic signature explicitly constructs `vector<T, N>` or `matrix<T, R, C>` and must
+  retain both domains, constrain the element as
+  `T : IBuiltinScalarArithmeticTypeDispatchMarker & INumericalExtrema`.
+  Recent numerics modules provide shaped `min`, `max`, and `clamp` overloads for that contract;
+  do not narrow the element to `IBuiltinScalarReal` merely to make overload resolution succeed.
 - `IDotProduct` independently supplies `dot(left, right)`, returning `T.Scalar`; built-in numeric scalars and ordinary vectors conform, but matrices and cooperative vectors currently do not.
 - `IFractional` adds division, reciprocal, and construction from builtin floating-point types without requiring an IEEE representation or elementary functions.
 - `IFloatingPoint` adds representation-specific rounding, remainder, splitting, sign-copying, and classification.
