@@ -77,6 +77,16 @@ Otherwise express the body-derived contract:
    Constraining a wrapper's element does not automatically make the wrapper conform.
 5. Validate the proposed contract in a small probe before restructuring a large shader.
 
+Before declaring a project-local interface for read-only integer indexing, probe the built-in
+`IArray<Element>` contract.
+Arrays, vectors, matrices, structured buffers, and other standard containers already use it, and
+newer toolchains may also provide it for read-only typed `Buffer<Element>` resources.
+Use `getCount()` only when the algorithm needs the extent; a generic body may use only the inherited
+read subscript.
+If the exact resource type in the supplied toolchain does not conform, introduce one narrow adapter
+or interface for the missing operation instead of assuming the conformance or broadening the
+algorithm's requirements.
+
 Keep independent source parameters independent unless the source contract equates them.
 A visible specialization where the buffer element, key, and comparator operand happen to be the
 same type does not justify collapsing those roles in the generic port.
