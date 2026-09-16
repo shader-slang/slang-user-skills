@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-interface IReadable<T>
-{
-    T read(uint index);
-}
-
 struct FixedPair<T>
 {
     T values[2];
 }
 
-extension<T> FixedPair<T> : IReadable<T>
+extension<T> FixedPair<T> : IArray<T>
 {
-    T read(uint index)
+    int getCount()
     {
-        return values[index];
+        return 2;
+    }
+
+    __subscript(int index) -> T
+    {
+        get { return values[index]; }
     }
 }
 
@@ -45,10 +45,9 @@ extension<Destination> FixedPair<Destination>
     }
 }
 
-T readFirst<T, C>(C values)
-    where C : IReadable<T>
+T readFirst<T, C : IArray<T>>(C values)
 {
-    return values.read(0);
+    return values[0];
 }
 
 RWStructuredBuffer<int> outputBuffer;

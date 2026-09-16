@@ -11,18 +11,18 @@ For example, keep the stored element and lookup key distinct when the source com
 different types:
 
 ```slang
-interface IReadable<Element>
-{
-    Element read(uint index);
-}
-
 interface ICompare<Element, Key>
 {
     int compare(Element element, Key key);
 }
+
+uint lowerBound<Element, Key, Container : IArray<Element>, Compare : ICompare<Element, Key>>(
+    Container values,
+    Key key,
+    Compare compare);
 ```
 
-The generic caller can then own `Element`, `Key`, the readable container, and the comparator as
+The generic caller owns `Element`, `Key`, the standard readable container, and the comparator as
 separate parameters.
 If an operator relationship cannot be expressed directly as a Slang constraint, move that one
 operation into an adapter or strategy interface rather than equating the operand types.
@@ -36,21 +36,23 @@ Either make the body operate on `T` components or make `Pair<T>` conform to the 
 Use a `where` clause when the constrained type is constructed or when it makes the relationship clearer:
 
 ```slang
-T readFirst<T, C>(C values)
-    where C : IReadable<T>
+T readFirst<T, C : IArray<T>>(C values)
 {
-    return values.read(0);
+    return values[0];
 }
 ```
 
 ## User-defined contracts
 
-Match the source operation precisely:
+Prefer an existing standard contract when it supplies the required behavior.
+Declare a custom read contract only when the source operation genuinely differs from `IArray<T>`
+or the supplied toolchain lacks a conformance for the resource involved.
+For example, an API whose only operation is an unsigned-address load can use:
 
 ```slang
-interface IReadable<T>
+interface ILoadAt<T>
 {
-    T read(uint index);
+    T load(uint address);
 }
 
 interface IAccumulator<T>
@@ -60,7 +62,7 @@ interface IAccumulator<T>
 ```
 
 Do not put writable value arrays and reference-backed writable resources behind one interface unless their mutation semantics genuinely match.
-Prefer a read-only contract when the body only reads.
+Prefer `IArray<T>` or another read-only contract when the body only reads.
 
 Different generic bodies over the same source type can require different contracts.
 Do not combine their requirements into one catch-all interface and then invent implementations for
@@ -106,11 +108,11 @@ If the natural contract is instead `Destination : IConvertFrom<Source>`, use a f
 Put generic parameters and their constraints before the extended type:
 
 ```slang
-extension<T : IReadable<int>> T
+extension<T : IArray<int>> T
 {
     int first()
     {
-        return this.read(0);
+        return this[0];
     }
 }
 ```
