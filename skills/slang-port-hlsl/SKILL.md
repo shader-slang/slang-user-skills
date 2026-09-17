@@ -23,6 +23,8 @@ Minimize the earliest unexpected diagnostic before undertaking a broad rewrite, 
 
 - Remove a redundant C- or C++-style struct forward declaration only after confirming that the full definition is present.
 - Move an unsupported out-of-line member body into the type or a suitable extension without changing visibility or generic constraints.
+- When Slang diagnoses an operator declared as a type member or in an extension, move it to module scope as a free operator and preserve the call-site syntax.
+  Ordinary extension-member lookup does not make a member or extension operator equivalent to an HLSL/C++ member operator.
 - Mark a receiver-mutating method `[mutating]`, including its interface requirement.
 - Port HLSL `operator[]` declarations to Slang `__subscript` syntax while preserving read-only versus writable access.
 - Preserve `inout` writeback.

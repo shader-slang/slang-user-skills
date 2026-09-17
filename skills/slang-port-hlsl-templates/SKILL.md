@@ -90,13 +90,12 @@ Otherwise express the body-derived contract:
 
 Before declaring a project-local interface for read-only integer indexing, probe the built-in
 `IArray<Element>` contract.
-Arrays, vectors, matrices, structured buffers, and other standard containers already use it, and
-newer toolchains may also provide it for read-only typed `Buffer<Element>` resources.
+Arrays, vectors, matrices, structured buffers, and other standard containers already use it.
+Compatible current bundled toolchains also make read-only typed `Buffer<Element>` resources conform to `IArray<Element>`.
 Use `getCount()` only when the algorithm needs the extent; a generic body may use only the inherited
 read subscript.
-If the exact resource type in the supplied toolchain does not conform, introduce one narrow adapter
-or interface for the missing operation instead of assuming the conformance or broadening the
-algorithm's requirements.
+For an older or mismatched toolchain, retain the probe below.
+If the exact resource type does not conform, introduce one narrow adapter or interface for the missing operation instead of assuming the conformance or broadening the algorithm's requirements.
 Do not infer that a core-module conformance is absent merely because it is not visible in installed
 `.slang` source files; many built-in declarations are embedded in the compiler.
 Compile an evaluation-only probe with the task's compiler and options, for example:

@@ -12,14 +12,15 @@ bool scalarLess<T : IScalarReal>(T left, T right)
     return left < right;
 }
 
-T shapedClamp<T : INumericalExtrema>(T value, T lower, T upper)
+T shapedClamp<T : INumericExtrema>(T value, T lower, T upper)
 {
     return clamp(value, lower, upper);
 }
 
 vector<T, N> builtinShapedClamp<
-    T : IBuiltinScalarArithmetic,
+    T : IBuiltinScalarNumeric,
     let N : int>(vector<T, N> value, vector<T, N> lower, vector<T, N> upper)
+    where vector<T, N> : INumericExtrema
 {
     return clamp(value, min(value, lower), max(value, upper));
 }

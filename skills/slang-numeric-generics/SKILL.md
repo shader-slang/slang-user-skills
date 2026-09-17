@@ -58,9 +58,8 @@ A broad public umbrella interface is preferable to an incomplete body, a narrowe
 `IDotProduct` is independent of `INumeric` and `IReal`.
 Conjoin it with the arithmetic capability when the same body uses both, for example `T : IReal & IDotProduct`.
 
-When the generic parameter is the scalar element of an explicitly constructed vector, recent
-numerics modules provide a direct builtin-vector adapter that retains integer and floating-point
-domains:
+When the generic parameter is the scalar element of an explicitly constructed vector, compatible current toolchains provide one generic core `dot` operation for builtin integer and floating-point vectors.
+The numerics module also makes `vector<T, N>` conform to `IDotProduct` whenever `T : IBuiltinScalarNumeric`:
 
 ```slang
 T innerProduct<
@@ -71,10 +70,9 @@ T innerProduct<
 }
 ```
 
-This admits both builtin integer and floating-point vectors. For an extensible scalar-or-shaped
-parameter, continue to constrain that operated type with `IDotProduct`. With an older numerics
-module that lacks the builtin-vector adapter, constrain the constructed type explicitly with
-`where vector<T, N> : IDotProduct` and probe every required element category.
+This admits both builtin integer and floating-point vectors without a project-local adapter.
+For an extensible scalar-or-shaped parameter, continue to constrain that operated type with `IDotProduct`.
+With an older numerics module that lacks the unified core operation and conformance, constrain the constructed type explicitly with `where vector<T, N> : IDotProduct` and probe every required element category.
 Do not narrow the element to floating point merely because two core `dot` overload families are involved.
 
 Important distinctions include:
@@ -82,17 +80,17 @@ Important distinctions include:
 - `IAdditive` supplies addition, subtraction, and zero.
 - `INumeric` adds same-type multiplication, one, and construction from builtin integer types.
 - `ISignedNumeric` adds negation and absolute value.
-- `INumericalExtrema` supplies component-wise `min`, `max`, `clamp`, and related extrema helpers
+- `INumericExtrema` supplies component-wise `min`, `max`, `clamp`, and related extrema helpers
   for numeric types, including built-in integer and floating-point scalars and vectors.
   When a generic signature explicitly constructs `vector<T, N>` or `matrix<T, R, C>` and must
-  retain both domains, constrain the element as `T : IBuiltinScalarArithmetic`.
-  Recent numerics modules provide shaped `min`, `max`, and `clamp` overloads for that contract;
-  do not narrow the element to `IBuiltinScalarReal` merely to make overload resolution succeed.
+  retain both domains, constrain the element as `T : IBuiltinScalarNumeric`.
+  Constrain the constructed type with `INumericExtrema` when the generic body applies shaped `min`, `max`, or `clamp`, for example `where vector<T, N> : INumericExtrema`.
+  Do not narrow the element to `IBuiltinScalarReal` merely to make overload resolution succeed.
 - `IDotProduct` independently supplies `dot(left, right)`, returning `T.Scalar`; built-in numeric scalars and ordinary vectors conform, but matrices and cooperative vectors currently do not.
 - `IFractional` adds division, reciprocal, and construction from builtin floating-point types without requiring an IEEE representation or elementary functions.
 - `IFloatingPoint` adds representation-specific rounding, remainder, splitting, sign-copying, and classification.
 - Elementary-function families are independent capabilities and can be joined with `&`.
-- `IRealOrderingFunctions` refines `INumericalExtrema` with `step`.
+- `IRealOrderingFunctions` refines `INumericExtrema` with `step`.
 - `IReal` is a convenience conjunction for fractional arithmetic, elementary functions,
   component-wise ordering, numerical extrema, and `step`.
 - `IComponentwiseOrdered` returns a same-shaped mask.
@@ -140,9 +138,8 @@ They intentionally exclude user-defined numeric types, but unlike the implementa
 
 Use an `IBuiltinScalar...` constraint only when the implementation genuinely depends on a builtin representation, intrinsic, or shape constructor.
 For example, an explicit real-valued `vector<T, N>` can justify `T : IBuiltinScalarReal`.
-Use `IBuiltinScalarArithmetic` as the broad convenience contract when one implementation
-intentionally spans builtin integer and floating-point arithmetic, component-wise comparisons,
-and numerical extrema.
+Use `IBuiltinScalarNumeric` as the broad convenience contract when one implementation intentionally spans builtin integer and floating-point same-type arithmetic and numeric extrema.
+Add `IComponentwiseOrdered`, `IPartiallyOrdered`, or `ITotallyOrdered` separately when the body also needs the corresponding shaped or scalar ordering operations.
 If no convenience alias includes an independent operation family, conjoin it explicitly, as in `IBuiltinScalarFloatingPointType & ITrigonometricFunctions`.
 
 Do not spell implementation-level `__Builtin...` markers in user-facing code when a corresponding `IBuiltinScalar...` alias expresses the contract.

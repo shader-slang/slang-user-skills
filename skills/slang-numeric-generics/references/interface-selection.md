@@ -16,7 +16,7 @@ The scalar-or-shaped column accepts component-wise vector and matrix behavior wh
 | Signed or unsigned integer behavior | `ISignedIntegerType`, `IUnsignedIntegerType` | corresponding `IScalar...` refinement |
 | Component-wise equality | `IComponentwiseEquatable` | `IEquatable` when a scalar `bool` is required |
 | Component-wise relational comparison | `IComponentwiseOrdered` | `IPartiallyOrdered` or `ITotallyOrdered` |
-| Component-wise `min`, `max`, `clamp`, and related extrema | `INumericalExtrema` | `INumericalExtrema & IScalarShapedType` when scalar-only must be explicit |
+| Component-wise `min`, `max`, `clamp`, and related extrema | `INumericExtrema` | `INumericExtrema & IScalarShapedType` when scalar-only must be explicit |
 | One elementary-function family | corresponding independent family | add `IScalarShapedType` if scalar-only |
 | All elementary-function families | `IElementaryFunctions` | `IScalarElementaryFunctions` |
 | Fractional arithmetic, elementary functions, component-wise ordering, extrema, and `step` | `IReal` | `IScalarReal` |
@@ -24,13 +24,14 @@ The scalar-or-shaped column accepts component-wise vector and matrix behavior wh
 Use capability conjunctions when appropriate.
 For example, `IFractional & IRootFunctions` is preferable to `IReal` when the body needs arithmetic and square roots but no ordering or other elementary functions.
 Because `IDotProduct` is independent of the arithmetic hierarchy, a body that also uses real arithmetic should state `IReal & IDotProduct`.
-Because `INumericalExtrema` is independent of integer and fractional arithmetic, use it directly
+Because `INumericExtrema` is independent of integer and fractional arithmetic, use it directly
 when extrema are the only common operation across those domains.
 For an explicitly constructed builtin vector or matrix whose element type remains generic across
-integer and floating-point representations, use `IBuiltinScalarArithmetic` on the element.
-That public convenience contract includes ordinary scalar arithmetic and numerical extrema, and
-the shaped `min`, `max`, and `clamp` overloads in recent numerics modules accept it.
+integer and floating-point representations, use `IBuiltinScalarNumeric` on the element.
+That public convenience contract includes ordinary same-type scalar arithmetic and numeric extrema.
+When the body applies extrema to the constructed shape, add `where vector<T, N> : INumericExtrema` or the corresponding matrix constraint.
 This is intentionally broader than `IBuiltinScalarReal`.
+Add the appropriate component-wise or scalar ordering interface separately when the body compares values.
 
 `IFloatingPoint` is not a synonym for real-number operations, and `IReal` does not require an IEEE floating-point representation.
 Use `IPartiallyOrdered` for IEEE-style scalar comparisons and `ITotallyOrdered` only when the type guarantees a total order.
@@ -43,10 +44,8 @@ For a built-in floating-point element plus one independent operation family, use
 
 `IDotProduct` applies when the constrained type itself is the scalar or vector passed to `dot`.
 Do not replace it with a scalar element constraint unless the generic signature explicitly constructs `vector<T, N>` and therefore operates on the element parameter separately.
-For that explicitly constructed builtin-vector case, recent numerics modules accept
-`T : IBuiltinScalarNumeric` directly and preserve signed-integer, unsigned-integer, and
-floating-point element domains. Older modules may require
-`where vector<T, N> : IDotProduct`; probe every required category before selecting that fallback.
+For that explicitly constructed builtin-vector case, compatible current toolchains provide one generic core `dot` operation across builtin integer and floating-point vectors and make `vector<T, N>` conform to `IDotProduct` whenever `T : IBuiltinScalarNumeric`.
+Older modules may require `where vector<T, N> : IDotProduct`; probe every required category before selecting that fallback.
 Matrices and cooperative vectors do not currently conform to `IDotProduct`.
 When `dot` must participate in automatic differentiation, import `slang.numerics.differentiable` and use `IDifferentiableDotProduct`.
 Built-in floating-point scalars and ordinary floating-point vectors already conform; a custom type must provide explicit forward- and reverse-mode derivative rules in addition to its base dot product.
