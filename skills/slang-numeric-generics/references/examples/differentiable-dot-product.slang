@@ -9,7 +9,7 @@ struct Pair : IDifferentiableDotProduct
 
     typealias Differential = Pair;
     typealias Scalar = float;
-    typealias Mask = bool;
+    typealias Mask = bool2;
 
     [Differentiable]
     static Differential dzero()
@@ -27,6 +27,14 @@ struct Pair : IDifferentiableDotProduct
     static This fromScalar(Scalar value)
     {
         return {value, value};
+    }
+
+    [Differentiable]
+    static This selectComponents(no_diff Mask condition, This ifTrue, This ifFalse)
+    {
+        return {
+            condition.x ? ifTrue.first : ifFalse.first,
+            condition.y ? ifTrue.second : ifFalse.second};
     }
 
     Scalar dotProductWith(This other)
