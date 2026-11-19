@@ -15,6 +15,13 @@ struct Pair<T : IScalarAdditive> : IAdditive
         return {value, value};
     }
 
+    static This selectComponents(Mask condition, This ifTrue, This ifFalse)
+    {
+        return {
+            condition.x ? ifTrue.x : ifFalse.x,
+            condition.y ? ifTrue.y : ifFalse.y};
+    }
+
     static This zero()
     {
         return {T.zero(), T.zero()};

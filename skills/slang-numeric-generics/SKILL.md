@@ -76,6 +76,9 @@ Read [references/interface-selection.md](references/interface-selection.md) for 
 Use `T.fromScalar(scalar)` when the body needs a shaped value from one logical scalar.
 Use `T.zero()` and `T.one()` through the appropriate arithmetic interfaces.
 
+When `slang.numerics` provides generic `select(T.Mask, T, T)`, custom shaped conformances must implement `selectComponents`.
+For each logical component, `selectComponents` uses the value from `ifTrue` when the corresponding mask component is true and from `ifFalse` otherwise.
+
 Public numeric interfaces deliberately support construction from builtin scalar types:
 
 ```slang

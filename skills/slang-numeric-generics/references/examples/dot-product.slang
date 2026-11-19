@@ -8,11 +8,18 @@ struct Pair : IDotProduct
     float second;
 
     typealias Scalar = float;
-    typealias Mask = bool;
+    typealias Mask = bool2;
 
     static This fromScalar(Scalar value)
     {
         return {value, value};
+    }
+
+    static This selectComponents(Mask condition, This ifTrue, This ifFalse)
+    {
+        return {
+            condition.x ? ifTrue.first : ifFalse.first,
+            condition.y ? ifTrue.second : ifFalse.second};
     }
 
     Scalar dotProductWith(This other)

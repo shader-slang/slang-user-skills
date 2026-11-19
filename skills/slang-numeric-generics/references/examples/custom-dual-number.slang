@@ -33,6 +33,12 @@ struct Dual : IScalarFractional
         return value;
     }
 
+    // A dual number is one logical scalar, including its primal and tangent.
+    static This selectComponents(Mask condition, This ifTrue, This ifFalse)
+    {
+        return condition ? ifTrue : ifFalse;
+    }
+
     static This zero()
     {
         return Dual(0.0, 0.0);

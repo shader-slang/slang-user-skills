@@ -21,7 +21,8 @@ Start with the narrowest scalar refinement that downstream generic code needs:
 - an elementary-function interface only for functions the type faithfully implements;
 - ordering only when the type has the promised comparison semantics.
 
-All scalar refinements share this shape contract:
+All scalar refinements use the following associated types and `fromScalar` implementation.
+Compilers that support generic shaped `select` also require `selectComponents`, which uses one Boolean to choose the entire scalar.
 
 ```slang
 typealias Scalar = This;
@@ -30,6 +31,11 @@ typealias Mask = bool;
 static This fromScalar(Scalar value)
 {
     return value;
+}
+
+static This selectComponents(Mask condition, This ifTrue, This ifFalse)
+{
+    return condition ? ifTrue : ifFalse;
 }
 ```
 
@@ -43,7 +49,9 @@ Add it only when downstream code needs `dot` on the custom type and there is a c
 It does not define matrix multiplication or give matrices a dot-product interpretation.
 
 For a differentiable custom dot product, import `slang.numerics.differentiable` and conform to `IDifferentiableDotProduct`.
-That refinement requires the ordinary `IDifferentiable` witnesses as well as both explicit derivative rules:
+On compilers with generic shaped `select`, mark `selectComponents` as `[Differentiable]` and its mask parameter as `no_diff`.
+Derivatives flow through the values selected by the mask.
+The refinement also requires the ordinary `IDifferentiable` witnesses and both explicit dot-product derivative rules:
 
 ```slang
 static DifferentialPair<Scalar> forwardDifferentiateDotProduct(
@@ -65,6 +73,7 @@ The compiler-checked [dual-number example](examples/custom-dual-number.slang) im
 ## Shaped wrappers
 
 When a wrapper represents a logical shape, set `Scalar` to its element type, set `Mask` to the corresponding Boolean shape, and implement the shaped operations on the wrapper itself.
+In `selectComponents`, each Boolean in the mask chooses the value for its corresponding logical element from one of the two wrappers.
 The compiler-checked [pair wrapper example](examples/wrapper-conformance.slang) shows a minimal `IAdditive` conformance.
 
 A constraint on `T` does not automatically make `Pair<T>` additive.
