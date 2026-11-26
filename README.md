@@ -11,6 +11,7 @@ Skills live under `skills/` and can be discovered by tools that support that spe
 - `slang-port-hlsl` covers general language and compiler differences encountered while porting HLSL to native Slang.
 - `slang-port-hlsl-templates` covers translation of HLSL templates into Slang generics.
 - `slang-numeric-generics` covers Slang's experimental capability-oriented numeric interfaces.
+- `slang-report-crash` finds, reviews, redacts and files the plain-text crash report that Slang writes when it stops on an internal compiler error or a crash.
 
 The skills are under active development and have not yet reached a stable release.
 In particular, the numeric interfaces currently require a Slang build that provides `slang.numerics` and enables experimental features.
